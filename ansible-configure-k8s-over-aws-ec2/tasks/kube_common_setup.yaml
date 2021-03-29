@@ -1,0 +1,75 @@
+- hosts:
+  - "tag_Name_kube*"
+  tasks:
+  - name: installing iproute 
+    yum: 
+      name: 
+      - iproute-tc
+      - docker
+      state: present
+
+
+  - name: configure bridging
+    copy: 
+      dest: /etc/modules-load.d/k8s.conf
+      content: br_netfilter
+
+
+  - name: further configure bridging
+    copy:
+      dest: /etc/sysctl.d/k8s.conf
+      content: |
+              net.bridge.bridge-nf-call-ip6tables = 1
+              net.bridge.bridge-nf-call-iptables = 1
+
+  - name: running sysctl
+    command: "sysctl --system"
+    changed_when: false 
+
+
+  - name: configuring yum for kubelet kubeadm kubectl
+    yum_repository:
+      name: Kubernetes
+      description: Kubernetes Repo
+      baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+      enabled: true
+      gpgcheck: true
+      repo_gpgcheck: true
+      gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+  - name: install kubelet kubeadm kubectl
+    yum:
+      name: 
+      - kubelet
+      - kubectl
+      - kubeadm 
+      state: present
+      disable_gpg_check: true
+
+  - name: start docker service
+    service:
+      name: docker
+      state: started
+        
+  - name: changing cgroupfs driver of docker
+    copy:
+      dest: /etc/docker/daemon.json
+      src: "../files/docker_daemon.json"
+    notify: restart docker engine
+
+
+  - name: start and enable kubelet
+    service:
+      name: kubelet
+      state: started
+      enabled: true
+
+
+  handlers:     
+  - name: restart docker engine
+    service:
+      name: docker
+      state: restarted 
+      enabled: true 
+
+

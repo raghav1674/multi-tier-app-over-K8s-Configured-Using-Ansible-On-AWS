@@ -1,0 +1,47 @@
+- hosts: tag_Name_kubeMaster
+  tasks:
+
+  - name: checking if kubelet is running or not
+    service:
+      name: kubelet
+      state: started
+    register: kubelet_running
+
+  - name: executing kubeadm init command
+    command: 'kubeadm init  --apiserver-advertise-address=0.0.0.0  --apiserver-cert-extra-sans="{{ item }}" --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem'
+    loop: "{{ groups['tag_Name_kubeMaster'] }}"
+    ignore_errors: true
+
+
+  - name: creating .kube folder
+    file:
+      path: /root/.kube
+      state: directory
+    register: kube_dir_created
+  
+  - name: creating kube config file
+    block:   
+    - name: copy config file to .kube folder
+      shell: "cp -i /etc/kubernetes/admin.conf $HOME/.kube/config"
+
+
+    - name: changing permission of file
+      shell: "chown $(id -u):$(id -g) $HOME/.kube/config"
+
+    - name: saving the token 
+      shell: "kubeadm token create --print-join-command > /join_command.sh"
+     
+
+    - name: fetch the token command
+      fetch:
+        src: /join_command.sh 
+        dest: files/join_command.sh
+    
+    when: kube_dir_created.changed
+
+  - name: installing weavenet for vxlan
+    shell: kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+
+
+ 
+

@@ -1,0 +1,8 @@
+key: KEY_NAME
+type_instance: t2.micro
+subnet_id: SUBNET_ID
+region_id: ap-south-1
+security_group_id: SECURITY_GROUP
+inventory_path: inventory
+ami_id: ami-068d43a544160b7ef 
+has_public_ip: true

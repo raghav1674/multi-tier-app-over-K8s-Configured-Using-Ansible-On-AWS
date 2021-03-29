@@ -1,0 +1,24 @@
+- hosts: localhost
+  vars_files:
+  - ../vars/secrets.yaml
+  - ../vars/instance_vars.yaml
+
+  tasks:
+
+  - name: installing boto
+    pip:
+      name: boto
+
+  - name: launching ec2-instances
+    amazon.aws.ec2:
+      aws_access_key: "{{ aws_access_key_value }}"
+      aws_secret_key: "{{ aws_secret_key_value }}"
+      region: "{{ region_val }}"
+      key_name: "{{ key_name_val }}"
+      instance_type: "{{ instance_type_val }}"
+      image: "{{ image_val}}"
+      count: "{{ count_val }}"
+      instance_tags:
+        name: "{{ tag_name }}"
+      vpc_subnet_id: "{{ vpc_subnet_id_val }}"
+      assign_public_ip: "{{ assign_public_ip_val }}"

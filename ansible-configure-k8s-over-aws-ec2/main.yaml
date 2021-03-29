@@ -1,0 +1,11 @@
+- name: installing commands and utilities on both slave and master 
+  import_playbook: tasks/kube_common_setup.yaml
+
+
+- name: configuring master node
+  import_playbook: tasks/kube_master_setup.yaml
+
+
+- name: configuring slave node
+  import_playbook: tasks/kube_slave_conf.yaml
+

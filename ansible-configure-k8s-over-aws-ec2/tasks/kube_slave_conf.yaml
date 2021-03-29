@@ -1,0 +1,11 @@
+- hosts: tag_Name_kubeSlave
+  tasks:
+  - name: copy the join command file
+    copy:
+      src: files/join_command.sh
+      dest: /root/join_command.sh
+      mode: "u+rwx"
+    register: join_command_copied
+
+  - name: running kubeadm join command
+    shell: "bash /root/join_command.sh/join_command.sh/{{ groups['tag_Name_kubeMaster'][0] }}/join_command.sh"
