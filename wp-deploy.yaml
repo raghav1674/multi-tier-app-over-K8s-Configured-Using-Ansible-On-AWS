@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wp-deploy
+  namespace: tech
+  labels:
+    tier: frontend
+spec:
+  replicas: 1
+  selector:
+    matchExpressions:
+    - key: app
+      operator: In
+      values:
+      - "wp"
+  strategy:
+    type: RollingUpdate 
+    rollingUpdate:
+      maxSurge: 1
+
+  template:
+    metadata:
+      name: wp-pod
+      labels:
+        app: wp
+    spec:
+      containers:
+      - name: wp-con
+        image: wordpress:4.8-apache 
+        ports:
+        - containerPort: 80
+        env:
+        - name: WORDPRESS_DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: wp-secret
+              key: WORDPRESS_DB_USER
+        - name: WORDPRESS_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: wp-secret
+              key: WORDPRESS_DB_PASSWORD        
+        - name: WORDPRESS_DB_NAME
+          value: wordpress_db
+        - name: WORDPRESS_DB_HOST
+          value: mysql-svc
+
+        
+
+
+         
+ 
